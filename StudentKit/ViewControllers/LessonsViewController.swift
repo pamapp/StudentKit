@@ -59,12 +59,13 @@ class LessonsViewController: UIViewController {
     
     lazy var currentLesson: UIView = {
         let view = UIView()
-        view.frame = CGRect(x: 23, y: 137, width: self.view.frame.width - 46, height: 130)
+        view.frame = CGRect(x: 23, y: 137, width: self.view.frame.width - 46, height: self.model.currentLesson().name.count > 30 ? 180 : 140)
         view.backgroundColor = .black
         view.layer.cornerRadius = 15
         
         let lessonTitle = UILabel()
-        lessonTitle.text = "Математическое \nмоделирование"
+        lessonTitle.text = self.model.currentLesson().name
+//        lessonTitle.text = "Проектирование интеллектуальных систем управления"
         lessonTitle.numberOfLines = 0
         lessonTitle.font = UIFont.boldSystemFont(ofSize: 17)
         lessonTitle.textColor = .white
@@ -75,7 +76,7 @@ class LessonsViewController: UIViewController {
         lessonStatus.textColor = .gray
         
         let lessonTime = UILabel()
-        lessonTime.text = "12:00 - 13:45"
+        lessonTime.text = self.model.currentLesson().time
         lessonTime.font = UIFont.systemFont(ofSize: 12)
         lessonTime.textColor = .gray
         
@@ -89,17 +90,19 @@ class LessonsViewController: UIViewController {
         circularProgressBarView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
+            circularProgressBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -70),
+            circularProgressBarView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
             lessonTitle.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
             lessonTitle.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
-
+            lessonTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -140),
+            
             lessonTime.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
             lessonTime.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
             
             lessonStatus.bottomAnchor.constraint(equalTo: lessonTime.topAnchor, constant: -10),
             lessonStatus.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
             
-            circularProgressBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -70),
-            circularProgressBarView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
 
         return view
@@ -130,7 +133,6 @@ class LessonsViewController: UIViewController {
         let time = formatter.string(from: date)
         return time
     }
-
 }
 
 extension LessonsViewController: UITableViewDelegate {
@@ -148,10 +150,7 @@ extension LessonsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let model = model.lessonByIndexPath(for: indexPath)[indexPath.row]
-        if model.name.count > 40 {
-            return 110
-        }
-        return 95
+        return model.name.count > 40 ? 110 : 95
     }
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -184,8 +183,7 @@ extension LessonsViewController: UITableViewDataSource {
         model.numberOfRows(section)
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath)
-    {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let maskLayer = CALayer()
         maskLayer.cornerRadius = 15
         maskLayer.backgroundColor = UIColor.black.cgColor
@@ -201,7 +199,6 @@ extension LessonsViewController: UITableViewDataSource {
         cell.title = model.name
         cell.type = model.type
         cell.time = model.time
-        self.model.dateToDate(lesson: model)
         return cell
     }
 }
@@ -219,7 +216,7 @@ extension LessonsViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
-
+        
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "subjectcell")
     }
 }
